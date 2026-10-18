@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Toko - Mobile POS</title>
+    <title>Smart POS - Mobile App</title>
     <link rel="stylesheet" href="style.css">
     
     <!-- SDK Firebase CDN -->
@@ -13,140 +13,166 @@
 <body>
 
     <div class="mobile-container">
+        <!-- Status Bar Mobile -->
+        <div class="status-bar">
+            <span>9:30</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <!-- Header -->
         <header>
-            <div>
-                <h1>Kasir Toko</h1>
-                <p>Smart POS Management</p>
+            <div class="header-title-container">
+                <div class="icon-btn-round">☰</div>
+                <h1 id="page-title">Purchase Management</h1>
             </div>
-            <button onclick="showPage('barang')" style="width: auto; padding: 6px 12px; font-size: 12px; background: #f39c12;">+ Item</button>
+            <button class="btn-add-item" onclick="showPage('barang')">+ Add Item</button>
         </header>
 
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-box">
+                🔍 <input type="text" id="cariBarang" placeholder="Search item by name..." oninput="cariBarang()">
+            </div>
+        </div>
+
+        <!-- Filter Kategori (Menu Horizontal Scroll) -->
+        <div class="category-scroll">
+            <div class="chip active">All</div>
+            <div class="chip">Makanan</div>
+            <div class="chip">Minuman</div>
+            <div class="chip">Snacks</div>
+            <div class="chip">Pre-Order</div>
+        </div>
+
+        <!-- Body Utama -->
         <main>
-            <!-- KELOLA BARANG -->
+            <!-- 1. HALAMAN UTAMA / BARANG (GAYA KARTU GRID SISI KIRI GAMBAR) -->
             <section id="barang" class="page active">
-                <h2>Kelola Barang</h2>
-                <div class="form-group">
-                    <input type="text" id="namaBarang" placeholder="Nama Barang">
+                <div class="product-grid" id="gridBarang">
+                    <!-- Barang dari database akan dimuat di sini -->
                 </div>
-                <div class="form-group">
-                    <input type="number" id="hargaBarang" placeholder="Harga (Rp)">
+
+                <div style="margin-top: 25px; background: white; padding: 15px; border-radius: 18px;">
+                    <h3 style="margin-top:0;">+ Tambah Barang Baru</h3>
+                    <div class="input-group">
+                        <label>Nama Barang</label>
+                        <input type="text" id="namaBarang" placeholder="Contoh: Tasty Snacks">
+                    </div>
+                    <div class="input-group">
+                        <label>Harga (Rp)</label>
+                        <input type="number" id="hargaBarang" placeholder="75000">
+                    </div>
+                    <div class="input-group">
+                        <label>Stok Initial</label>
+                        <input type="number" id="stokBarang" placeholder="10">
+                    </div>
+                    <button class="btn-primary-orange" onclick="tambahBarang()">Simpan Barang</button>
                 </div>
-                <div class="form-group">
-                    <input type="number" id="stokBarang" placeholder="Stok">
-                </div>
-                <button onclick="tambahBarang()">Simpan Barang</button>
-                
-                <hr style="margin: 20px 0; border:0; border-top:1px solid #eee;">
-                
-                <div class="search-box">
-                    <input type="text" id="cariBarang" placeholder="Cari barang..." oninput="cariBarang()">
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Barang</th>
-                            <th>Harga</th>
-                            <th>Stok</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelBarang"></tbody>
-                </table>
             </section>
 
-            <!-- TRANSAKSI -->
+            <!-- 2. HALAMAN TRANSAKSI / KASIR (GAYA GAMBAR KANAN) -->
             <section id="transaksi" class="page">
-                <h2>Transaksi Kasir</h2>
-                <div class="form-group">
+                <div class="input-group">
+                    <label>Pilih Barang</label>
                     <select id="pilihBarang">
                         <option value="">-- Pilih Barang --</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <input type="number" id="jumlahBarang" value="1" min="1" placeholder="Jumlah">
+                <div class="input-group">
+                    <label>Jumlah</label>
+                    <input type="number" id="jumlahBarang" value="1" min="1">
                 </div>
-                <button onclick="tambahKeranjang()">Tambah ke Keranjang</button>
+                <button class="btn-primary-orange" onclick="tambahKeranjang()" style="margin-bottom: 15px;">+ Add Items to Cart</button>
 
-                <h3>Keranjang</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Jml</th>
-                            <th>Subtotal</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelKeranjang"></tbody>
-                </table>
-
-                <h3 style="margin-top: 20px;">Total Tagihan: <span id="total" style="color: #e67e22;">Rp 0</span></h3>
-                <div class="form-group" style="margin-top: 10px;">
-                    <input type="number" id="pembayaran" placeholder="Nominal Pembayaran">
+                <h3 style="margin-bottom: 8px;">Billing Items</h3>
+                <div id="listKeranjang">
+                    <!-- List Item Keranjang -->
                 </div>
-                <button onclick="bayar()" style="background-color: #27ae60;">Bayar & Selesai</button>
-                <p style="margin-top: 10px; font-weight: bold; font-size: 13px;">Kembalian: <span id="kembalian">Rp 0</span></p>
+
+                <div style="background: white; padding: 15px; border-radius: 18px; margin-top: 15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+                        <span style="font-size: 13px; color:#666;">Total Amount</span>
+                        <span id="total" style="font-size: 16px; font-weight:700; color:#E8702A;">Rp 0</span>
+                    </div>
+                    <div class="input-group">
+                        <label>Payment Mode (Cash)</label>
+                        <input type="number" id="pembayaran" placeholder="Masukkan Nominal Pembayaran">
+                    </div>
+                    <button class="btn-primary-orange" onclick="bayar()">Save & Confirm Sale</button>
+                    <p style="text-align: center; font-size: 12px; margin-top: 8px;">Kembalian: <span id="kembalian">Rp 0</span></p>
+                </div>
             </section>
 
-            <!-- PRE-ORDER MONITORING -->
-            <section id="preorder" class="page">
-                <h2>Monitoring Pre-Order</h2>
-                <p style="font-size: 12px; color: #777;">Pesanan masuk dari pelanggan secara real-time.</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Pelanggan</th>
-                            <th>Barang</th>
-                            <th>Jml</th>
-                            <th>Tgl Ambil</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelPreOrder"></tbody>
-                </table>
-            </section>
-
-            <!-- RIWAYAT -->
+            <!-- 3. HALAMAN RIWAYAT / TRANSACTIONS (GAYA GAMBAR TENGAH) -->
             <section id="riwayat" class="page">
-                <h2>Riwayat Transaksi</h2>
-                <button onclick="hapusRiwayat()" class="btn-danger" style="padding: 8px; font-size: 12px; margin-bottom: 10px;">Hapus Semua Riwayat</button>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Barang</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelRiwayat"></tbody>
-                </table>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                    <span style="font-size: 13px; font-weight: 700;">📅 All Time</span>
+                    <button onclick="hapusRiwayat()" style="border:none; background:transparent; color:#E74C3C; font-size:12px; font-weight:600;">Clear All</button>
+                </div>
+                <div id="listRiwayat">
+                    <!-- List Riwayat akan dimuat di sini -->
+                </div>
+            </section>
+
+            <!-- 4. MONITORING PRE-ORDER -->
+            <section id="preorder" class="page">
+                <h3>Daftar Pesanan Pre-Order</h3>
+                <div id="listPreOrder">
+                    <!-- List Preorder akan dimuat di sini -->
+                </div>
             </section>
         </main>
 
-        <!-- BOTTOM NAVIGATION BAR -->
+        <!-- Floating Cart Bar (Gaya Gambar Kiri) -->
+        <div class="cart-floating-bar" id="floatingCart" onclick="showPage('transaksi')">
+            <div>
+                <span id="cartCount" style="font-size: 11px; color: #888; display: block;">0 Items</span>
+                <span id="cartTotal" style="font-size: 14px; font-weight: 700; color: #111;">Rp 0</span>
+            </div>
+            <button class="btn-orange-next">Next →</button>
+        </div>
+
+        <!-- Bottom Navigation Bar (Sama Persis Gambar) -->
         <nav>
-            <button onclick="showPage('barang')" id="nav-barang" class="active">📦 Barang</button>
-            <button onclick="showPage('transaksi')" id="nav-transaksi">🛒 Kasir</button>
-            <button onclick="showPage('preorder')" id="nav-preorder">📋 Pre-Order</button>
-            <button onclick="showPage('riwayat')" id="nav-riwayat">📊 Riwayat</button>
+            <button class="nav-item active" onclick="showPage('barang')" id="nav-barang">
+                <div class="nav-icon-bg">🏠</div>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="showPage('transaksi')" id="nav-transaksi">
+                <div class="nav-icon-bg">🏷️</div>
+                <span>Sale</span>
+            </button>
+            <button class="nav-item" onclick="showPage('preorder')" id="nav-preorder">
+                <div class="nav-icon-bg">📋</div>
+                <span>Pre-Order</span>
+            </button>
+            <button class="nav-item" onclick="showPage('riwayat')" id="nav-riwayat">
+                <div class="nav-icon-bg">📊</div>
+                <span>History</span>
+            </button>
         </nav>
     </div>
 
-    <!-- Script Navigasi Tambahan untuk Mobile UI -->
+    <!-- Script Navigasi Tambahan -->
     <script>
         function showPage(pageId) {
-            document.querySelectorAll(".page").forEach(page => {
-                page.classList.remove("active");
-            });
-            document.querySelectorAll("nav button").forEach(btn => {
-                btn.classList.remove("active");
-            });
+            document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+            document.querySelectorAll(".nav-item").forEach(btn => btn.classList.remove("active"));
             
             const targetPage = document.getElementById(pageId);
             if (targetPage) targetPage.classList.add("active");
             
             const targetBtn = document.getElementById("nav-" + pageId);
             if (targetBtn) targetBtn.classList.add("active");
+
+            // Update Title Header sesuai halaman
+            const titleMap = {
+                'barang': 'Purchase Management',
+                'transaksi': 'Confirm Sale',
+                'preorder': 'Pre-Order List',
+                'riwayat': 'Transactions'
+            };
+            document.getElementById("page-title").innerText = titleMap[pageId] || 'Kasir App';
         }
     </script>
     <script src="script.js"></script>
