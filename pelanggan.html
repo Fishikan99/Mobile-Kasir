@@ -1,53 +1,104 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pre-Order Online - Mobile</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layar Monitor Pelanggan - Kasir Resto</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: { 500: '#f06414', 600: '#d94909' },
+            bgSoft: '#fbf8f5',
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
+<body class="bg-stone-900 min-h-screen text-stone-800 font-sans p-4 sm:p-8 flex items-center justify-center antialiased">
 
-    <div class="mobile-container" style="justify-content: center;">
-        <header style="text-align: center; display: block;">
-            <h1>KASIRPO ONLINE</h1>
-            <p>Formulir Pre-Order Mandiri</p>
-        </header>
+  <div class="w-full max-w-5xl bg-bgSoft rounded-3xl shadow-2xl overflow-hidden border-4 border-stone-800 flex flex-col md:flex-row min-h-[600px]">
+    
+    <!-- Left Column: Customer Order Summary List -->
+    <div class="flex-1 p-6 md:p-8 flex flex-col border-b md:border-b-0 md:border-r border-stone-200">
+      <div class="flex items-center justify-between border-b border-stone-200 pb-4 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-brand-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-brand-500/30">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-extrabold text-stone-900">Rincian Pesanan Anda</h1>
+            <p id="display-customer" class="text-xs text-stone-500 font-medium">Pelanggan: Umum</p>
+          </div>
+        </div>
+        <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Kasir Aktif
+        </span>
+      </div>
 
-        <main>
-            <div class="form-group">
-                <label for="namaPelanggan">Nama Anda:</label>
-                <input type="text" id="namaPelanggan" placeholder="Masukkan Nama Lengkap">
-            </div>
-
-            <div class="form-group">
-                <label for="barangPreOrder">Nama Barang / Pesanan:</label>
-                <input type="text" id="barangPreOrder" placeholder="Contoh: Kemeja Custom L">
-            </div>
-
-            <div class="form-group">
-                <label for="jumlahPreOrder">Jumlah Pesanan:</label>
-                <input type="number" id="jumlahPreOrder" value="1" min="1">
-            </div>
-
-            <div class="form-group">
-                <label for="tanggalAmbil">Tanggal Rencana Ambil:</label>
-                <input type="date" id="tanggalAmbil">
-            </div>
-
-            <button type="button" onclick="estimasiTanggalPO()" style="background-color: #3498db; margin-bottom: 8px;">
-                ⚡ Hitung Estimasi Otomatis
-            </button>
-
-            <button type="button" onclick="tambahPreOrderPelanggan()" style="background-color: #27ae60;">
-                Kirim Pesanan Pre-Order
-            </button>
-        </main>
+      <!-- Items List -->
+      <div id="display-items" class="flex-1 overflow-y-auto space-y-3 pr-2 no-scrollbar">
+        <div class="text-center py-20 text-stone-400">
+          <i class="fa-solid fa-basket-shopping text-4xl mb-3 block"></i>
+          <p class="text-sm font-semibold">Belum ada item pesanan.</p>
+        </div>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Right Column: Live Totals & Payment Status -->
+    <div class="w-full md:w-96 bg-stone-900 text-white p-6 md:p-8 flex flex-col justify-between">
+      <div>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-6">Ringkasan Pembayaran</h2>
+
+        <div class="space-y-3 text-sm border-b border-stone-800 pb-6 mb-6">
+          <div class="flex justify-between text-stone-400">
+            <span>Subtotal</span>
+            <span id="display-subtotal" class="font-semibold text-white">Rp 0</span>
+          </div>
+          <div class="flex justify-between text-stone-400">
+            <span>Pajak PPN (10%)</span>
+            <span id="display-tax" class="font-semibold text-white">Rp 0</span>
+          </div>
+          <div class="flex justify-between text-stone-400">
+            <span>Diskon Toko</span>
+            <span id="display-discount" class="font-semibold text-emerald-400">-Rp 0</span>
+          </div>
+        </div>
+
+        <div class="bg-stone-800/80 p-5 rounded-2xl border border-stone-700/60 mb-6">
+          <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Total Yang Harus Dibayar</p>
+          <p id="display-total" class="text-3xl font-extrabold text-brand-500">Rp 0</p>
+        </div>
+
+        <div id="display-cash-info" class="space-y-2 text-xs bg-stone-800/40 p-4 rounded-xl border border-stone-800 hidden">
+          <div class="flex justify-between text-stone-400">
+            <span>Uang Diterima:</span>
+            <span id="display-paid" class="font-bold text-white">Rp 0</span>
+          </div>
+          <div class="flex justify-between text-stone-400">
+            <span>Kembalian:</span>
+            <span id="display-change" class="font-bold text-emerald-400">Rp 0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center pt-6 border-t border-stone-800">
+        <p class="text-xs font-bold text-stone-300">Selamat Menikmati Hidangan Anda!</p>
+        <p class="text-[10px] text-stone-500 mt-1">Kasir Resto & Cafe System</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
