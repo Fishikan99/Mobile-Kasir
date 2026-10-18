@@ -1,171 +1,139 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart POS App UI</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- SDK Firebase CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Kasir Mobile - Smart POS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff8f1',
+              100: '#feebd4',
+              200: '#fbd4aa',
+              300: '#f8b475',
+              400: '#f4893d',
+              500: '#f06414', // Primary orange
+              600: '#d94909',
+              700: '#b4330b',
+            },
+            bgSoft: '#fbf8f5',
+            cardBg: '#ffffff',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar for hidden look */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Print styles for Receipt */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-receipt, #printable-receipt * {
+        visibility: visible;
+      }
+      #printable-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
-<body>
+<body class="bg-stone-200 min-h-screen flex items-center justify-center font-sans p-0 sm:p-4 text-stone-800 antialiased selection:bg-brand-500 selection:text-white">
 
-    <div class="mobile-frame">
-        <div class="notch"></div>
-
-        <!-- Top Status Bar -->
-        <div class="status-bar">
-            <span>9:30</span>
-            <span>📶 🔋</span>
-        </div>
-
-        <!-- Top App Header -->
-        <div class="app-header">
-            <div class="header-left">
-                <div class="btn-icon-circle">☰</div>
-                <h1 class="header-title" id="header-title">Purchase Management</h1>
-            </div>
-            <button class="btn-pill-add" onclick="showPage('barang')">Add Item</button>
-        </div>
-
-        <!-- Search Bar Component -->
-        <div class="search-wrapper">
-            <div class="search-input-box">
-                🔍 <input type="text" id="cariBarang" placeholder="Search dishes by name..." oninput="cariBarang()"> 📷
-            </div>
-        </div>
-
-        <!-- Category Horizontal Filter Scroll -->
-        <div class="category-bar">
-            <div class="chip-item active">All</div>
-            <div class="chip-item">Fruits</div>
-            <div class="chip-item">Shakes</div>
-            <div class="chip-item">Burger</div>
-            <div class="chip-item">Snacks</div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="main-content">
-            
-            <!-- 1. HALAMAN UTAMA BARANG / PURCHASE MANAGEMENT (GAMBAR SISI KIRI) -->
-            <section id="barang" class="page active">
-                <div class="grid-products" id="gridBarang">
-                    <!-- Kartu Produk dari Database Firebase -->
-                </div>
-
-                <!-- Form Tambah Barang Baru -->
-                <div style="background: white; padding: 14px; border-radius: 16px; margin-top: 20px; border: 1px solid #F0E6DD;">
-                    <h4 style="margin:0 0 10px 0;">+ Tambah Barang Baru</h4>
-                    <input type="text" id="namaBarang" placeholder="Nama Barang" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ddd; border-radius:8px;">
-                    <input type="number" id="hargaBarang" placeholder="Harga" style="width:100%; padding:8px; margin-bottom:6px; border:1px solid #ddd; border-radius:8px;">
-                    <input type="number" id="stokBarang" placeholder="Stok" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px;">
-                    <button onclick="tambahBarang()" style="width:100%; background:#E8702A; color:white; border:none; padding:10px; border-radius:12px; font-weight:bold; cursor:pointer;">Simpan Barang</button>
-                </div>
-            </section>
-
-            <!-- 2. HALAMAN TRANSAKSI / CONFIRM SALE (GAMBAR SISI KANAN) -->
-            <section id="transaksi" class="page">
-                <div style="background: white; padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid #F0E6DD;">
-                    <label style="font-size:11px; color:#888;">Pilih Barang</label>
-                    <select id="pilihBarang" style="width:100%; border:none; outline:none; background:transparent; font-weight:bold;"></select>
-                </div>
-                
-                <div style="background: white; padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid #F0E6DD;">
-                    <label style="font-size:11px; color:#888;">Jumlah</label>
-                    <input type="number" id="jumlahBarang" value="1" min="1" style="width:100%; border:none; outline:none; font-weight:bold;">
-                </div>
-                
-                <button onclick="tambahKeranjang()" style="width:100%; background:#FFF; border:1px solid #E8702A; color:#E8702A; padding:10px; border-radius:14px; font-weight:bold; margin-bottom:12px; cursor:pointer;">+ Add Items</button>
-
-                <h4 style="margin: 10px 0 6px 0;">Billing Items</h4>
-                <div id="listKeranjang"></div>
-
-                <!-- Action Extra Pills -->
-                <div style="display:flex; gap:6px; margin: 12px 0;">
-                    <button style="background:#FFF; border:1px solid #EAE0D5; padding:6px 10px; border-radius:12px; font-size:10px; color:#E8702A;">+ Add Discount</button>
-                    <button style="background:#FFF; border:1px solid #EAE0D5; padding:6px 10px; border-radius:12px; font-size:10px; color:#E8702A;">+ Add TAX</button>
-                </div>
-
-                <div style="background: white; padding: 12px; border-radius: 14px; border: 1px solid #F0E6DD;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                        <span style="font-size:12px; color:#666;">Total Amount</span>
-                        <span id="total" style="font-size:14px; font-weight:bold; color:#E8702A;">Rp 0</span>
-                    </div>
-                    <input type="number" id="pembayaran" placeholder="Nominal Pembayaran (Cash)" style="width:100%; padding:8px; border:1px solid #eee; border-radius:8px; margin-bottom:10px;">
-                    <button onclick="bayar()" style="width:100%; background:#E8702A; color:white; border:none; padding:12px; border-radius:14px; font-weight:bold; cursor:pointer;">Save Item</button>
-                    <p style="text-align:center; font-size:11px; margin-top:6px;">Kembalian: <span id="kembalian">Rp 0</span></p>
-                </div>
-            </section>
-
-            <!-- 3. HALAMAN RIWAYAT / TRANSACTIONS (GAMBAR SISI TENGAH) -->
-            <section id="riwayat" class="page">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <span style="font-size:12px; font-weight:bold;">📅 All Time</span>
-                    <button onclick="hapusRiwayat()" style="border:none; background:transparent; color:#E74C3C; font-size:11px;">Clear All</button>
-                </div>
-                <div id="listRiwayat"></div>
-            </section>
-
-            <!-- 4. HALAMAN PRE-ORDER -->
-            <section id="preorder" class="page">
-                <h4 style="margin-top:0;">Daftar Pre-Order Active</h4>
-                <div id="listPreOrder"></div>
-            </section>
-
-        </div>
-
-        <!-- Floating Cart Bar (Gaya Gambar Kiri) -->
-        <div class="cart-floating-bar" id="floatingCart" onclick="showPage('transaksi')">
-            <div>
-                <span id="cartCount" style="font-size:10px; color:#888; display:block;">2 Items</span>
-                <span id="cartTotal" style="font-size:13px; font-weight:bold; color:#111;">Rp 0</span>
-            </div>
-            <button class="btn-next-orange">Next</button>
-        </div>
-
-        <!-- Bottom Navigation Bar (Presisi Gambar UI) -->
-        <div class="bottom-nav">
-            <button class="nav-btn active" onclick="showPage('barang')" id="nav-barang">
-                <div class="nav-icon-circle">🏠</div>
-                <span>Home</span>
-            </button>
-            <button class="nav-btn" onclick="showPage('transaksi')" id="nav-transaksi">
-                <div class="nav-icon-circle">🏷️</div>
-                <span>Transaction</span>
-            </button>
-            <button class="nav-btn" onclick="showPage('preorder')" id="nav-preorder">
-                <div class="nav-icon-circle">📋</div>
-                <span>Pre-Order</span>
-            </button>
-            <button class="nav-btn" onclick="showPage('riwayat')" id="nav-riwayat">
-                <div class="nav-icon-circle">📊</div>
-                <span>History</span>
-            </button>
-        </div>
+  <!-- Outer Mobile Container Simulator -->
+  <div class="relative w-full max-w-[420px] h-[100vh] sm:h-[880px] bg-stone-900 sm:rounded-[48px] shadow-2xl overflow-hidden border-0 sm:border-[10px] border-stone-800 flex flex-col">
+    
+    <!-- Phone Top Status Bar / Dynamic Island -->
+    <div class="bg-bgSoft px-6 pt-3 pb-2 flex justify-between items-center z-30 shrink-0 select-none">
+      <span id="current-time" class="text-xs font-bold text-stone-900 tracking-tight">09:41</span>
+      <!-- Notch / Dynamic Island -->
+      <div class="w-24 h-4 bg-stone-900 rounded-full hidden sm:block"></div>
+      <div class="flex items-center space-x-1.5 text-xs text-stone-800">
+        <i class="fa-solid font-bold fa-signal text-[10px]"></i>
+        <i class="fa-solid font-bold fa-wifi text-[10px]"></i>
+        <i class="fa-solid font-bold fa-battery-full text-xs"></i>
+      </div>
     </div>
 
-    <script>
-        function showPage(pageId) {
-            document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
-            document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-            
-            const targetPage = document.getElementById(pageId);
-            if (targetPage) targetPage.classList.add("active");
-            
-            const targetBtn = document.getElementById("nav-" + pageId);
-            if (targetBtn) targetBtn.classList.add("active");
+    <!-- MAIN APP SCREEN AREA -->
+    <div class="flex-1 bg-bgSoft relative overflow-hidden flex flex-col">
 
-            const titleMap = {
-                'barang': 'Purchase Management',
-                'transaksi': 'Confirm Sale',
-                'preorder': 'Pre-Order List',
-                'riwayat': 'Transactions'
-            };
-            document.getElementById("header-title").innerText = titleMap[pageId] || 'Kasir App';
-        }
-    </script>
-    <script src="script.js"></script>
-</body>
-</html>
+      <!-- ========================================== -->
+      <!-- SCREEN 1: PURCHASE / MENU CATALOG          -->
+      <!-- ========================================== -->
+      <section id="screen-catalog" class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- Header -->
+        <div class="px-5 pt-3 pb-2 flex justify-between items-center shrink-0">
+          <div class="flex items-center gap-3">
+            <button class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-stone-700 active:scale-95 transition-transform">
+              <i class="fa-solid fa-bars text-sm"></i>
+            </button>
+            <h1 class="text-lg font-bold text-stone-900">Kasir Resto</h1>
+          </div>
+          <button onclick="openAddProductModal()" class="bg-brand-100 text-brand-600 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 hover:bg-brand-200 transition-colors">
+            <i class="fa-solid fa-plus"></i> Menu Baru
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="px-5 py-2 shrink-0">
+          <div class="relative flex items-center">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-stone-400 text-xs"></i>
+            <input type="text" id="search-input" oninput="renderProducts()" placeholder="Cari menu makanan/minuman..." 
+              class="w-full bg-white pl-9 pr-10 py-2.5 rounded-2xl text-xs font-medium text-stone-800 placeholder-stone-400 border border-stone-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30">
+            <button class="absolute right-3 text-stone-400 hover:text-brand-500">
+              <i class="fa-solid fa-qrcode text-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="px-5 py-2 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
+          <button onclick="setCategory('all')" id="cat-all" class="cat-btn bg-brand-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm shadow-brand-500/20">Semua</button>
+          <button onclick="setCategory('makanan')" id="cat-makanan" class="cat-btn bg-white text-stone-600 border border-stone-100 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">Makanan</button>
+          <button onclick="setCategory('minuman')" id="cat-minuman" class="cat-btn bg-white text-stone-600 border border-stone-100 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">Minuman</button>
+          <button onclick="setCategory('snack')" id="cat-snack" class="cat-btn bg-white text-stone-600 border border-stone-100 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">Cemilan</button>
+        </div>
+
+        <!-- Products Grid (Scrollable) -->
+        <div class="flex-1 overflow-y-auto px-5 py-3 no-scrollbar pb-24">
+          <div id="product-grid" class="grid grid-cols-2 gap-3">
+            <!-- Dynamic Product Cards Injected Here -->
+          </div>
+        </div>
+
+        <!-- Floating Cart Bar (Appears when items selected) -->
+        <div id="floating-cart-bar" class="absolute bottom-16 left-4 right-4 bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-stone-100/80 flex items-center justify-between z-20 transition-all transform translate-y-32">
+          <div class
