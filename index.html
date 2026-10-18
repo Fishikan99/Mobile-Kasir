@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Toko - Mobile POS</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- SDK Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <header>
+            <div>
+                <h1>Kasir Toko</h1>
+                <p>Smart POS Management</p>
+            </div>
+            <button onclick="showPage('barang')" style="width: auto; padding: 6px 12px; font-size: 12px; background: #f39c12;">+ Item</button>
+        </header>
+
+        <main>
+            <!-- KELOLA BARANG -->
+            <section id="barang" class="page active">
+                <h2>Kelola Barang</h2>
+                <div class="form-group">
+                    <input type="text" id="namaBarang" placeholder="Nama Barang">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="hargaBarang" placeholder="Harga (Rp)">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="stokBarang" placeholder="Stok">
+                </div>
+                <button onclick="tambahBarang()">Simpan Barang</button>
+                
+                <hr style="margin: 20px 0; border:0; border-top:1px solid #eee;">
+                
+                <div class="search-box">
+                    <input type="text" id="cariBarang" placeholder="Cari barang..." oninput="cariBarang()">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Barang</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelBarang"></tbody>
+                </table>
+            </section>
+
+            <!-- TRANSAKSI -->
+            <section id="transaksi" class="page">
+                <h2>Transaksi Kasir</h2>
+                <div class="form-group">
+                    <select id="pilihBarang">
+                        <option value="">-- Pilih Barang --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="jumlahBarang" value="1" min="1" placeholder="Jumlah">
+                </div>
+                <button onclick="tambahKeranjang()">Tambah ke Keranjang</button>
+
+                <h3>Keranjang</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Jml</th>
+                            <th>Subtotal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelKeranjang"></tbody>
+                </table>
+
+                <h3 style="margin-top: 20px;">Total Tagihan: <span id="total" style="color: #e67e22;">Rp 0</span></h3>
+                <div class="form-group" style="margin-top: 10px;">
+                    <input type="number" id="pembayaran" placeholder="Nominal Pembayaran">
+                </div>
+                <button onclick="bayar()" style="background-color: #27ae60;">Bayar & Selesai</button>
+                <p style="margin-top: 10px; font-weight: bold; font-size: 13px;">Kembalian: <span id="kembalian">Rp 0</span></p>
+            </section>
+
+            <!-- PRE-ORDER MONITORING -->
+            <section id="preorder" class="page">
+                <h2>Monitoring Pre-Order</h2>
+                <p style="font-size: 12px; color: #777;">Pesanan masuk dari pelanggan secara real-time.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pelanggan</th>
+                            <th>Barang</th>
+                            <th>Jml</th>
+                            <th>Tgl Ambil</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelPreOrder"></tbody>
+                </table>
+            </section>
+
+            <!-- RIWAYAT -->
+            <section id="riwayat" class="page">
+                <h2>Riwayat Transaksi</h2>
+                <button onclick="hapusRiwayat()" class="btn-danger" style="padding: 8px; font-size: 12px; margin-bottom: 10px;">Hapus Semua Riwayat</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Barang</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelRiwayat"></tbody>
+                </table>
+            </section>
+        </main>
+
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav>
+            <button onclick="showPage('barang')" id="nav-barang" class="active">📦 Barang</button>
+            <button onclick="showPage('transaksi')" id="nav-transaksi">🛒 Kasir</button>
+            <button onclick="showPage('preorder')" id="nav-preorder">📋 Pre-Order</button>
+            <button onclick="showPage('riwayat')" id="nav-riwayat">📊 Riwayat</button>
+        </nav>
+    </div>
+
+    <!-- Script Navigasi Tambahan untuk Mobile UI -->
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll(".page").forEach(page => {
+                page.classList.remove("active");
+            });
+            document.querySelectorAll("nav button").forEach(btn => {
+                btn.classList.remove("active");
+            });
+            
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.add("active");
+            
+            const targetBtn = document.getElementById("nav-" + pageId);
+            if (targetBtn) targetBtn.classList.add("active");
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
