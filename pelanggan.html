@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Order Online - Mobile</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <div class="mobile-container" style="justify-content: center;">
+        <header style="text-align: center; display: block;">
+            <h1>KASIRPO ONLINE</h1>
+            <p>Formulir Pre-Order Mandiri</p>
+        </header>
+
+        <main>
+            <div class="form-group">
+                <label for="namaPelanggan">Nama Anda:</label>
+                <input type="text" id="namaPelanggan" placeholder="Masukkan Nama Lengkap">
+            </div>
+
+            <div class="form-group">
+                <label for="barangPreOrder">Nama Barang / Pesanan:</label>
+                <input type="text" id="barangPreOrder" placeholder="Contoh: Kemeja Custom L">
+            </div>
+
+            <div class="form-group">
+                <label for="jumlahPreOrder">Jumlah Pesanan:</label>
+                <input type="number" id="jumlahPreOrder" value="1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="tanggalAmbil">Tanggal Rencana Ambil:</label>
+                <input type="date" id="tanggalAmbil">
+            </div>
+
+            <button type="button" onclick="estimasiTanggalPO()" style="background-color: #3498db; margin-bottom: 8px;">
+                ⚡ Hitung Estimasi Otomatis
+            </button>
+
+            <button type="button" onclick="tambahPreOrderPelanggan()" style="background-color: #27ae60;">
+                Kirim Pesanan Pre-Order
+            </button>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
